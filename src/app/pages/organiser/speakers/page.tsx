@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Pencil, Trash2 } from 'lucide-react'
+import axios from 'axios'
 
 export default function SpeakersPage() {
   const [speakers, setSpeakers] = useState([

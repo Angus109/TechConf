@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -9,10 +9,82 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { CalendarDays, MapPin, Menu, Mic2, Users, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { useToast } from '@/hooks/use-toast'
+
+import NoImage from '@/components/ui/svg'
+import axios from 'axios'
+
+
+type FormData = {
+  name: string;
+  email: string;
+  ticketType: string;
+}
+
 
 export default function ConferenceLandingPage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
+  const [error, setError] = useState('')
+  const { toast } = useToast()
+  const domain = process.env.URL || "https://event-server-d01f.onrender.com"
+
+  const [formData, setFormData] = useState<FormData>({
+    name: '',
+    email: '',
+    ticketType: '',
+  })
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    setFormData(prev => ({ ...prev, [name]: value }))
+  }
+
+
+  const handleSelectChange = (value: string) => {
+    setFormData(prev => ({ ...prev, ticketType: value }))
+  }
+
+
+
+
+
+
+  const handleTickets = (event: React.FormEvent) =>{
+      event.preventDefault();
+      setIsLoading(true)
+
+      console.log(formData)
+
+      axios.post(`${domain}/api/ticket`,{
+        formData
+      })
+      .then((response)=>{
+        console.log(response)
+        setIsLoading(false)
+        if(response.status == 200){
+          toast({
+            title:  "Your Booking is Confirmed!",
+            description: response.data.message || "Your ticket purchase for TechConf has been successfully completed. You will receive a confirmation email with your order details and e-ticket(s).",
+          })
+        }else{
+          toast({
+            title:  " Booking Failed",
+            description: response.data.message || " We were unable to process your ticket purchase for TechConf at this time. Please double-check your payment information and try again. ",
+          })
+        }
+      })
+      .catch((error)=>{
+        console.log(error)
+        setIsLoading(false)
+        toast({
+          title: " Booking Error",
+          description: error.message ||  " An error occurred while processing your ticket purchase. Please try again later .",
+        })
+      })
+
+  } 
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen)
 
@@ -28,7 +100,7 @@ export default function ConferenceLandingPage() {
             <a href="#tickets" className="hover:underline">Tickets</a>
             <a href="#faq" className="hover:underline">FAQ</a>
             <Button variant="secondary" size="sm" onClick={()=>router.push('/pages/login')} >Login</Button>
-            <Button variant="outline" size="sm">Sign Up</Button>
+            <Button variant="outline" size="sm"onClick={()=>router.push('/pages/login_organiser')}  >organisers</Button>
           </nav>
           <Button variant="ghost" size="icon" className="md:hidden" onClick={toggleMenu}>
             {isMenuOpen ? <X /> : <Menu />}
@@ -44,8 +116,8 @@ export default function ConferenceLandingPage() {
             <a href="#sponsors" className="hover:underline" onClick={toggleMenu}>Sponsors</a>
             <a href="#tickets" className="hover:underline" onClick={toggleMenu}>Tickets</a>
             <a href="#faq" className="hover:underline" onClick={toggleMenu}>FAQ</a>
-            <Button variant="secondary"  size="sm"onClick={()=>router.push('/pages/login')} >Login</Button>
-            <Button variant="outline" size="sm">Sign Up</Button>
+            <Button variant="secondary"  size="sm" onClick={()=>router.push('/pages/login')} >Login</Button>
+            <Button variant="outline" size="sm" onClick={()=>router.push('/pages/login_organiser')} >organiser</Button>
           </nav>
         </div>
       )}
@@ -86,12 +158,14 @@ export default function ConferenceLandingPage() {
             <h2 className="text-3xl font-bold mb-8 text-center">Featured Speakers</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {[
-                { name: "Jane Doe", role: "AI Researcher", image: "/placeholder.svg?height=400&width=400" },
-                { name: "John Smith", role: "Cybersecurity Expert", image: "/placeholder.svg?height=400&width=400" },
-                { name: "Alice Johnson", role: "UX Designer", image: "/placeholder.svg?height=400&width=400" },
+                { name: "Jane Doe", role: "AI Researcher", image: "./placeholder.svg" },
+                { name: "John Smith", role: "Cybersecurity Expert", image: "/placeholder.svg" },
+                { name: "Alice Johnson", role: "UX Designer", image: "placeholder.svg" },
               ].map((speaker, index) => (
                 <div key={index} className="bg-card text-card-foreground rounded-lg shadow-lg overflow-hidden">
-                  <img src={speaker.image} alt={speaker.name} className="w-full h-48 object-cover" />
+                 <div>
+                 <NoImage />
+                 </div>
                   <div className="p-4">
                     <h3 className="text-xl font-semibold">{speaker.name}</h3>
                     <p className="text-muted-foreground">{speaker.role}</p>
@@ -113,7 +187,9 @@ export default function ConferenceLandingPage() {
                 { name: "CodeMasters", logo: "/placeholder.svg?height=200&width=200" },
               ].map((sponsor, index) => (
                 <div key={index} className="bg-white p-4 rounded-lg shadow-md flex items-center justify-center">
-                  <img src={sponsor.logo} alt={sponsor.name} className="max-w-full max-h-24" />
+                
+                 <NoImage />
+              
                 </div>
               ))}
             </div>
@@ -123,29 +199,29 @@ export default function ConferenceLandingPage() {
         <section id="tickets" className="py-16 bg-muted">
           <div className="container mx-auto px-4">
             <h2 className="text-3xl font-bold mb-8 text-center">Get Your Tickets</h2>
-            <form className="max-w-md mx-auto space-y-4">
+            <form className="max-w-md mx-auto space-y-4" onSubmit={handleTickets}>
               <div>
                 <Label htmlFor="name">Full Name</Label>
-                <Input id="name" placeholder="John Doe" />
+                <Input id="name" placeholder="John Doe" name="name" onChange={(handleInputChange)} value={formData.name}/>
               </div>
               <div>
                 <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" placeholder="john@example.com" />
+                <Input id="email" type="email" name="email" placeholder="john@example.com" value={formData.email} onChange={handleInputChange} />
               </div>
               <div>
                 <Label htmlFor="ticket-type">Ticket Type</Label>
-                <Select>
+                <Select onValueChange={handleSelectChange} value={formData.ticketType}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select ticket type" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="early-bird">Early Bird</SelectItem>
+                    <SelectItem value="early-bird" >Early Bird</SelectItem>
                     <SelectItem value="regular">Regular</SelectItem>
                     <SelectItem value="vip">VIP</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-              <Button type="submit" className="w-full">Purchase Ticket</Button>
+              <Button type="submit" className="w-full" isLoading={isLoading}>Purchase Ticket</Button>
             </form>
           </div>
         </section>

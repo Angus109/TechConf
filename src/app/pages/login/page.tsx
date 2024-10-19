@@ -1,4 +1,5 @@
 'use client'
+import "./../../globals.css";
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
@@ -8,13 +9,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { CalendarDays } from "lucide-react"
 import { useRouter } from 'next/navigation'
 import axios from "axios"
+import { useToast } from '@/hooks/use-toast'
+
 
 export default function LoginSignup() {
-  const [isLogin, setIsLogin] = useState(true)
+  const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [name, setName]= useState("")
+  const domain = process.env.URL || "https://event-server-d01f.onrender.com"
+  const {toast} = useToast()
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault()
@@ -25,33 +30,51 @@ export default function LoginSignup() {
 
   const handleLogin = async (event: React.FormEvent)=> {
     event.preventDefault()
-    axios.post("", {
+    setIsLoading(true)
+    axios.post(`${domain}/api/user/login`, {
       email: email,
       password: password
     },
   {
     
   }).then((response)=>{
-    console.log(response)
+    console.log(response.data)
+    setIsLoading(false)
     if(response.status == 200){
-      router.push("/home")
+     
+      toast({
+        title: " Login Successful",
+        description: response.data.message ||  "You have successfully logged in to your account.",
+      })
+      router.push("/pages")
+    }else{
+      toast({
+        title: " Login Failed",
+        description: response.data.message ||  " Please check your credentials and try again.",
+      })
     }
 
 
   }).catch((err)=>{
     console.log(err)
+    setIsLoading(false)
+    toast({
+      title: "Login Error",
+      description: err.response.data.message || err.message ||  " An unexpected error occurred during login. Please try again later or contact our support team.",
+    })
+
   })
 
 
-       router.push("/login")
   }
 
 
   const handleSignup = (event: React.FormEvent)=>{
     event.preventDefault()
+    setIsLoading(true)
 
 
-    axios.post("", {
+    axios.post(`${domain}/api/user`, {
       name: name,
       email: email,
       password: password
@@ -59,14 +82,31 @@ export default function LoginSignup() {
   {
     
   }).then((response)=>{
-    console.log(response)
+    console.log(response.data)
+    setIsLoading(false)
     if(response.status == 200){
-      router.push("/home")
+      
+      toast({
+        title: " Login Successful",
+        description: response.data.message ||  "You have successfully logged in to your account.",
+      })
+      router.push("/pages")
+    }else{
+      toast({
+        title: " Login Failed",
+        description: response.data.message ||  " Please check your credentials and try again.",
+      })
     }
 
 
   }).catch((err)=>{
     console.log(err)
+    setIsLoading(false)
+    toast({
+      title: "signup Error",
+      description: err.response.data.message || err.message ||  " An unexpected error occurred during login. Please try again later or contact our support team.",
+    })
+
   })
   
   }
@@ -94,7 +134,7 @@ export default function LoginSignup() {
                   <Label htmlFor="password">Password</Label>
                   <Input onChange={(e)=>setPassword(e.target.value)} value={password}  id="password" type="password" required />
                 </div>
-                <Button type="submit" className="w-full" >Log In</Button>
+                <Button type="submit" className="w-full" isLoading={isLoading} >Log In</Button>
               </form>
               <div className="mt-4 text-center">
                 <a href="#" className="text-sm text-primary hover:underline">Forgot password?</a>
@@ -118,7 +158,7 @@ export default function LoginSignup() {
                   <Label htmlFor="confirm-password">Confirm Password</Label>
                   <Input id="confirm-password" type="password" required />
                 </div>
-                <Button type="submit" className="w-full">Sign Up</Button>
+                <Button type="submit" className="w-full" isLoading={isLoading}>Sign Up</Button>
               </form>
             </TabsContent>
           </Tabs>

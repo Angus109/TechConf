@@ -10,10 +10,10 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 
 
 const sidebarItems = [
-  { name: 'Dashboard', href: 'dashboard', icon: LayoutDashboard },
-  { name: 'Speakers', href: 'speakers', icon: Users },
-  { name: 'Sponsors', href: 'sponsors', icon: Award },
-  { name: 'Tickets', href: 'tickets', icon: Ticket },
+  { name: 'Dashboard', href: '/pages/organiser', icon: LayoutDashboard },
+  { name: 'Speakers', href: '/pages/organiser/speakers', icon: Users },
+  { name: 'Sponsors', href: '/pages/organiser/sponsors', icon: Award },
+  { name: 'Tickets', href: '/pages/organiser/tickets', icon: Ticket },
 ]
 
 export default function AdminLayout({

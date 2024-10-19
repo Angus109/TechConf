@@ -99,7 +99,7 @@ export default function ConferenceLandingPage() {
             <a href="#tickets" className="hover:underline">Tickets</a>
             <a href="#faq" className="hover:underline">FAQ</a>
             <Button variant="secondary" size="sm" onClick={()=>router.push('/pages/login')} >Login</Button>
-            <Button variant="outline" size="sm"onClick={()=>router.push('/pages/login_organiser')}  >organisers</Button>
+            <Button variant="secondary" size="sm"onClick={()=>router.push('/pages/login_organiser')}  >organisers</Button>
           </nav>
           <Button variant="ghost" size="icon" className="md:hidden" onClick={toggleMenu}>
             {isMenuOpen ? <X /> : <Menu />}
@@ -116,7 +116,7 @@ export default function ConferenceLandingPage() {
             <a href="#tickets" className="hover:underline" onClick={toggleMenu}>Tickets</a>
             <a href="#faq" className="hover:underline" onClick={toggleMenu}>FAQ</a>
             <Button variant="secondary"  size="sm" onClick={()=>router.push('/pages/login')} >Login</Button>
-            <Button variant="outline" size="sm" onClick={()=>router.push('/pages/login_organiser')} >organiser</Button>
+            <Button variant="secondary" size="sm" onClick={()=>router.push('/pages/login_organiser')} >organiser</Button>
           </nav>
         </div>
       )}

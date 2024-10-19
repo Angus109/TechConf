@@ -26,7 +26,6 @@ export default function ConferenceLandingPage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
-  const [error, setError] = useState('')
   const { toast } = useToast()
   const domain = process.env.URL || "https://event-server-d01f.onrender.com"
 

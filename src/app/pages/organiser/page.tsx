@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { CalendarDays, DollarSign, Users, Ticket } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("overview")
@@ -75,7 +76,7 @@ export default function AdminDashboard() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <p>TechConf 2024 is scheduled for July 15-17, 2024 in San Francisco, CA. We're expecting over 5,000 attendees and have confirmed 50 speakers across 5 tracks.</p>
+              <p>TechConf 2024 is scheduled for July 15-17, 2024 in San Francisco, CA. We&apos;re expecting over 5,000 attendees and have confirmed 50 speakers across 5 tracks.</p>
             </CardContent>
           </Card>
         </TabsContent>
@@ -123,7 +124,7 @@ export default function AdminDashboard() {
               <div className="grid gap-4 md:grid-cols-3">
                 {topSponsors.map((sponsor) => (
                   <div key={sponsor.id} className="flex items-center space-x-4">
-                    <img src={sponsor.logo} alt={`${sponsor.name} logo`} className="w-12 h-12 object-contain" />
+                    <Image src={sponsor.logo} alt={`${sponsor.name} logo`} className="w-12 h-12 object-contain" />
                     <div>
                       <p className="font-medium">{sponsor.name}</p>
                       <p className="text-sm text-muted-foreground">{sponsor.tier}</p>

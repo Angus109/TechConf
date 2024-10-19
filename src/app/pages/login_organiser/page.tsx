@@ -23,14 +23,7 @@ export default function AdminLoginSignup() {
   const router = useRouter();
   const {toast} = useToast()
 
-  const handleSubmit = (event: React.FormEvent) => {
-    event.preventDefault()
-    // Handle form submission here
-    console.log("Form submitted")
-    // Simulating an error for demonstration
-    setError("Invalid credentials. Please try again.")
-  }
-
+ 
 
   const handleLogin = async (event: React.FormEvent)=> {
     event.preventDefault()
@@ -49,7 +42,7 @@ export default function AdminLoginSignup() {
         title: "Login Successful",
         description: response.data.message ||  "You have successfully logged in to your account.",
       });
-      router.push("/pages/admin")
+      router.push("/pages/organiser")
     }else{
       toast({
         title: "Login Failed",
@@ -61,6 +54,7 @@ export default function AdminLoginSignup() {
   }).catch((err)=>{
     console.log(err)
     setIsLoading(false)
+    setError("error")
     toast({
       title: "Login Error",
       description: err.response.data.message ||  "An unexpected error occurred during login. Please try again later or contact our support team.",
@@ -91,7 +85,7 @@ export default function AdminLoginSignup() {
         title: "signup Successful",
         description: response.data.message ||  "You have successfully logged in to your account.",
       });
-      router.push("/pages/admin")
+      router.push("/pages/organiser")
     }else{
       toast({
         title: "Signup Failed",

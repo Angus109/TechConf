@@ -5,11 +5,12 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Pencil, Trash2 } from 'lucide-react'
-import axios from 'axios'
+import Image from 'next/image'
+
 
 export default function SpeakersPage() {
   const [speakers, setSpeakers] = useState([
@@ -60,7 +61,7 @@ export default function SpeakersPage() {
                 {speakers.map((speaker) => (
                   <TableRow key={speaker.id}>
                     <TableCell>
-                      <img src={speaker.image} alt={`${speaker.name}`} className="w-10 h-10 rounded-full object-cover" />
+                      <Image src={speaker.image} alt={`${speaker.name}`} className="w-10 h-10 rounded-full object-cover" />
                     </TableCell>
                     <TableCell className="font-medium">{speaker.name}</TableCell>
                     <TableCell>{speaker.role}</TableCell>
@@ -90,7 +91,7 @@ export default function SpeakersPage() {
           <DialogHeader>
             <DialogTitle>Add New Speaker</DialogTitle>
             <DialogDescription>
-              Enter the details of the new speaker here. Click save when you're done.
+              Enter the details of the new speaker here. Click save when you&apos;re done.
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleAddSpeaker}>

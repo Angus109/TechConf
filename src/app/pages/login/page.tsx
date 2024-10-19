@@ -21,11 +21,6 @@ export default function LoginSignup() {
   const domain = process.env.URL || "https://event-server-d01f.onrender.com"
   const {toast} = useToast()
 
-  const handleSubmit = (event: React.FormEvent) => {
-    event.preventDefault()
-    // Handle form submission here
-    console.log("Form submitted")
-  }
 
 
   const handleLogin = async (event: React.FormEvent)=> {

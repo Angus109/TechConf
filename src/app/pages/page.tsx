@@ -27,7 +27,8 @@ export default function ConferenceLandingPage() {
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
   const { toast } = useToast()
-  const domain = process.env.URL || "https://event-server-d01f.onrender.com"
+  const domain = process.env.URL 
+  
 
   const [formData, setFormData] = useState<FormData>({
     name: '',
@@ -106,6 +107,7 @@ export default function ConferenceLandingPage() {
           </Button>
         </div>
       </header>
+     
 
       {isMenuOpen && (
         <div className="md:hidden bg-primary text-primary-foreground py-2">
@@ -141,7 +143,7 @@ export default function ConferenceLandingPage() {
             </Button>
           </div>
         </section>
-
+   
         <section id="about" className="py-16 bg-background">
           <div className="container mx-auto px-4">
             <h2 className="text-3xl font-bold mb-8 text-center">About TechConf</h2>

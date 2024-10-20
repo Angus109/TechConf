@@ -20,7 +20,7 @@ export default function AdminLoginSignup() {
   const [name, setName]= useState("")
   const [code, setCode]= useState("")
   const [error, setError] = useState<string | null>(null)
-  const domain = process.env.URL || "https://event-server-d01f.onrender.com"
+  const domain = process.env.URL 
   const router = useRouter();
   const {toast} = useToast()
 

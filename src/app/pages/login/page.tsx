@@ -18,7 +18,7 @@ export default function LoginSignup() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [name, setName]= useState("")
-  const domain = process.env.URL || "https://event-server-d01f.onrender.com"
+  const domain = process.env.URL 
   const {toast} = useToast()
 
 

@@ -18,6 +18,7 @@ export default function AdminLoginSignup() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [name, setName]= useState("")
+  const [code, setCode]= useState("")
   const [error, setError] = useState<string | null>(null)
   const domain = process.env.URL || "https://event-server-d01f.onrender.com"
   const router = useRouter();
@@ -73,7 +74,8 @@ export default function AdminLoginSignup() {
     axios.post(`${domain}/api/admin`, {
       name: name,
       email: email,
-      password: password
+      password: password,
+      code: code
     },
   {
     
@@ -210,7 +212,7 @@ export default function AdminLoginSignup() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="adminCode">Admin Invitation Code</Label>
-                  <Input id="adminCode" placeholder="Enter your admin code" required />
+                  <Input id="adminCode" onChange={(e)=> setCode(e.target.value)} placeholder="Enter your admin code" required />
                 </div>
                 <Button type="submit" className="w-full" isLoading={isLoading}>Sign Up</Button>
               </form>

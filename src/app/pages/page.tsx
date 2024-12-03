@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -10,15 +10,24 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { CalendarDays, MapPin, Menu, Mic2, Users, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/hooks/use-toast'
-
-import NoImage from '@/components/ui/svg'
+import { useAppSelector } from '../store/hook'
+import { Flame, Sparkles, Zap, Target } from 'lucide-react'
 import axios from 'axios'
-
+import Image from 'next/image'
 
 type FormData = {
   name: string;
   email: string;
   ticketType: string;
+}
+
+interface Speaker {
+  _id: string;
+  name: string;
+  bio: string;
+  image: string;
+  role: string,
+  company: string
 }
 
 
@@ -27,14 +36,44 @@ export default function ConferenceLandingPage() {
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
   const { toast } = useToast()
-  const domain = process.env.URL 
-  
+  const domain = process.env.URL
+  const { currentOrganiser } = useAppSelector(state => state.organiser)
+  const [speakers, SetSpeakers] = useState([])
+  // const [sponsors, SetSponsors] = useState([])
+
+
+  useEffect(() => {
+    axios.get(
+      `${domain}/api/speaker`
+    ).then((response) => {
+      console.log(response.data)
+      SetSpeakers(response.data.result)
+    }).catch((err) => {
+      console.log(err)
+    });
+
+    // axios.get(
+    //   `${domain}/api/sponsor`
+
+    // ).then((response) => {
+    //   SetSponsors(response.data.result)
+    // })
+  }, [domain])
+
+  console.log(currentOrganiser)
 
   const [formData, setFormData] = useState<FormData>({
     name: '',
     email: '',
     ticketType: '',
   })
+
+  const logos = [
+    { icon: Flame, name: 'Ignite', color: 'text-orange-500' },
+    { icon: Sparkles, name: 'Stellar', color: 'text-purple-500' },
+    { icon: Zap, name: 'Bolt', color: 'text-yellow-500' },
+    { icon: Target, name: 'Bullseye', color: 'text-red-500' },
+  ]
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -51,40 +90,40 @@ export default function ConferenceLandingPage() {
 
 
 
-  const handleTickets = (event: React.FormEvent) =>{
-      event.preventDefault();
-      setIsLoading(true)
+  const handleTickets = (event: React.FormEvent) => {
+    event.preventDefault();
+    setIsLoading(true)
 
-      console.log(formData)
+    console.log(formData)
 
-      axios.post(`${domain}/api/ticket`,{
-        formData
-      })
-      .then((response)=>{
+    axios.post(`${domain}/api/ticket`, {
+      formData
+    })
+      .then((response) => {
         console.log(response)
         setIsLoading(false)
-        if(response.status == 200){
+        if (response.status == 200) {
           toast({
-            title:  "Your Booking is Confirmed!",
+            title: "Your Booking is Confirmed!",
             description: response.data.message || "Your ticket purchase for TechConf has been successfully completed. You will receive a confirmation email with your order details and e-ticket(s).",
           })
-        }else{
+        } else {
           toast({
-            title:  " Booking Failed",
+            title: " Booking Failed",
             description: response.data.message || " We were unable to process your ticket purchase for TechConf at this time. Please double-check your payment information and try again. ",
           })
         }
       })
-      .catch((error)=>{
+      .catch((error) => {
         console.log(error)
         setIsLoading(false)
         toast({
           title: " Booking Error",
-          description: error.message ||  " An error occurred while processing your ticket purchase. Please try again later .",
+          description: error.message || " An error occurred while processing your ticket purchase. Please try again later .",
         })
       })
 
-  } 
+  }
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen)
 
@@ -99,15 +138,15 @@ export default function ConferenceLandingPage() {
             <a href="#sponsors" className="hover:underline">Sponsors</a>
             <a href="#tickets" className="hover:underline">Tickets</a>
             <a href="#faq" className="hover:underline">FAQ</a>
-            <Button variant="secondary" size="sm" onClick={()=>router.push('/pages/login')} >Login</Button>
-            <Button variant="secondary" size="sm"onClick={()=>router.push('/pages/login_organiser')}  >organisers</Button>
+            <Button variant="secondary" size="sm" onClick={() => router.push('/pages/login')} >Login</Button>
+            <Button variant="secondary" size="sm" onClick={() => router.push('/pages/login_organiser')}  >organisers</Button>
           </nav>
           <Button variant="ghost" size="icon" className="md:hidden" onClick={toggleMenu}>
             {isMenuOpen ? <X /> : <Menu />}
           </Button>
         </div>
       </header>
-     
+
 
       {isMenuOpen && (
         <div className="md:hidden bg-primary text-primary-foreground py-2">
@@ -117,8 +156,8 @@ export default function ConferenceLandingPage() {
             <a href="#sponsors" className="hover:underline" onClick={toggleMenu}>Sponsors</a>
             <a href="#tickets" className="hover:underline" onClick={toggleMenu}>Tickets</a>
             <a href="#faq" className="hover:underline" onClick={toggleMenu}>FAQ</a>
-            <Button variant="secondary"  size="sm" onClick={()=>router.push('/pages/login')} >Login</Button>
-            <Button variant="secondary" size="sm" onClick={()=>router.push('/pages/login_organiser')} >organiser</Button>
+            <Button variant="secondary" size="sm" onClick={() => router.push('/pages/login')} >Login</Button>
+            <Button variant="secondary" size="sm" onClick={() => router.push('/pages/login_organiser')} >organiser</Button>
           </nav>
         </div>
       )}
@@ -143,12 +182,12 @@ export default function ConferenceLandingPage() {
             </Button>
           </div>
         </section>
-   
+
         <section id="about" className="py-16 bg-background">
           <div className="container mx-auto px-4">
             <h2 className="text-3xl font-bold mb-8 text-center">About TechConf</h2>
             <p className="text-lg text-center max-w-2xl mx-auto">
-              TechConf is the premier gathering for developers, designers, and tech enthusiasts. 
+              TechConf is the premier gathering for developers, designers, and tech enthusiasts.
               Join us for three days of inspiring talks, workshops, and networking opportunities.
             </p>
           </div>
@@ -158,18 +197,20 @@ export default function ConferenceLandingPage() {
           <div className="container mx-auto px-4">
             <h2 className="text-3xl font-bold mb-8 text-center">Featured Speakers</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {[
-                { name: "Jane Doe", role: "AI Researcher", image: "./placeholder.svg" },
-                { name: "John Smith", role: "Cybersecurity Expert", image: "/placeholder.svg" },
-                { name: "Alice Johnson", role: "UX Designer", image: "placeholder.svg" },
-              ].map((speaker, index) => (
+              {speakers.map((speaker: Speaker, index) => (
                 <div key={index} className="bg-card text-card-foreground rounded-lg shadow-lg overflow-hidden">
-                 <div>
-                 <NoImage />
-                 </div>
+                  <div className="relative aspect-[4/3] w-full">
+                    <Image
+                      src={speaker?.image}
+                      alt={`Photo of ${speaker?.name}`}
+                      fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      className="object-cover"
+                    />
+                  </div>
                   <div className="p-4">
-                    <h3 className="text-xl font-semibold">{speaker.name}</h3>
-                    <p className="text-muted-foreground">{speaker.role}</p>
+                    <h3 className="text-xl font-semibold">{speaker?.name}</h3>
+                    <p className="text-muted-foreground">{speaker?.role}</p>
                   </div>
                 </div>
               ))}
@@ -181,16 +222,10 @@ export default function ConferenceLandingPage() {
           <div className="container mx-auto px-4">
             <h2 className="text-3xl font-bold mb-8 text-center">Our Sponsors</h2>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-              {[
-                { name: "TechCorp", logo: "/placeholder.svg?height=200&width=200" },
-                { name: "InnovateLabs", logo: "/placeholder.svg?height=200&width=200" },
-                { name: "FutureSoft", logo: "/placeholder.svg?height=200&width=200" },
-                { name: "CodeMasters", logo: "/placeholder.svg?height=200&width=200" },
-              ].map((sponsor, index) => (
-                <div key={index} className="bg-white p-4 rounded-lg shadow-md flex items-center justify-center">
-                
-                 <NoImage />
-              
+              {logos.map((logo, index) => (
+                <div key={index} className="flex flex-col items-center justify-center p-6 bg-white rounded-lg shadow-md">
+                  <logo.icon className={`w-16 h-16 ${logo.color}`} />
+                  <h2 className="mt-4 text-2xl font-bold">{logo.name}</h2>
                 </div>
               ))}
             </div>
@@ -203,7 +238,7 @@ export default function ConferenceLandingPage() {
             <form className="max-w-md mx-auto space-y-4" onSubmit={handleTickets}>
               <div>
                 <Label htmlFor="name">Full Name</Label>
-                <Input id="name" placeholder="John Doe" name="name" onChange={(handleInputChange)} value={formData.name}/>
+                <Input id="name" placeholder="John Doe" name="name" onChange={(handleInputChange)} value={formData.name} />
               </div>
               <div>
                 <Label htmlFor="email">Email</Label>

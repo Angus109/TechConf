@@ -124,7 +124,7 @@ export default function AdminDashboard() {
               <div className="grid gap-4 md:grid-cols-3">
                 {topSponsors.map((sponsor) => (
                   <div key={sponsor.id} className="flex items-center space-x-4">
-                    <Image src={sponsor.logo} alt={`${sponsor.name} logo`} className="w-12 h-12 object-contain" />
+                    <Image src={sponsor.logo} alt={`${sponsor.name}`} className="w-12 h-12 object-contain" />
                     <div>
                       <p className="font-medium">{sponsor.name}</p>
                       <p className="text-sm text-muted-foreground">{sponsor.tier}</p>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -9,28 +9,112 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Pencil, Trash2 } from 'lucide-react'
+import axios from 'axios'
+import { useToast } from '@/hooks/use-toast'
 import Image from 'next/image'
+import { useAppDispatch, useAppSelector } from '@/app/store/hook'
+import { fetchSpeakers, addSpeaker, removeSpeaker, } from '@/app/store/slices/speakerSlice'
+
+interface Speaker {
+  _id: string;
+  name: string;
+  bio: string;
+  image: string;
+  role: string,
+  company: string
+}
+
+
+
 
 
 export default function SpeakersPage() {
-  const [speakers, setSpeakers] = useState([
-    { id: 1, name: "Dr. Jane Smith", role: "AI Researcher", company: "TechCorp", bio: "Leading expert in machine learning and neural networks.", image: "/placeholder.svg?height=100&width=100" },
-    { id: 2, name: "John Doe", role: "Cybersecurity Expert", company: "SecureNet", bio: "Specializes in ethical hacking and network security.", image: "/placeholder.svg?height=100&width=100" },
-    { id: 3, name: "Alice Johnson", role: "UX Designer", company: "DesignHub", bio: "Passionate about creating intuitive and accessible user interfaces.", image: "/placeholder.svg?height=100&width=100" },
-  ])
 
   const [newSpeaker, setNewSpeaker] = useState({ name: '', role: '', company: '', bio: '', image: '' })
   const [isAddingSpeaker, setIsAddingSpeaker] = useState(false)
+  
+   
+  const {toast} = useToast()
+  const dispatch = useAppDispatch()
+  const {speakers, status} = useAppSelector(state => state.speakers)
 
-  const handleAddSpeaker = (e: React.FormEvent) => {
+
+
+  useEffect(() => {
+    if (status === 'idle') {
+      dispatch(fetchSpeakers())
+    }
+  }, [status, dispatch])
+
+
+
+
+ 
+
+  const handleAddSpeaker = async(e: React.FormEvent) => {
     e.preventDefault()
-    setSpeakers([...speakers, { ...newSpeaker, id: speakers.length + 1 }])
-    setNewSpeaker({ name: '', role: '', company: '', bio: '', image: '' })
+    // setSpeakers([...speakers, { ...newSpeaker, id: speakers.length + 1 }])
+    // setNewSpeaker({ name: '', role: '', company: '', bio: '', image: '' })
+    const token = localStorage.getItem("admin_auth_token") || ""
+    console.log(token)
+    console.log(newSpeaker)
+    axios.post(`${process.env.URL}/api/speaker`,
+        newSpeaker,
+        {
+          headers: {
+             'Authorization': `${token}`,
+             'Content-Type': 'application/json'
+          }
+        }
+    )
+    .then((response)=>{
+      console.log(response)
+      dispatch(addSpeaker(response.data.result))
+      toast({
+        title: "successful",
+        description: response.data.result.message ||  "speaker added succesfully.",
+      })
+    })
+    .catch((err)=>{
+      console.log(err);
+      toast({
+        title: "Error",
+        description: err.response.data.message ||  "An unexpected error occurred. Please try again later or contact our support team.",
+      })
+    })
+
+
     setIsAddingSpeaker(false)
   }
 
-  const handleDeleteSpeaker = (id: number) => {
-    setSpeakers(speakers.filter(speaker => speaker.id !== id))
+  const handleDeleteSpeaker = async(id: string) => {
+    // setSpeakers(speakers.filter(speaker => speaker?.id !== id))
+    const token = localStorage.getItem("admin_auth_token") || ""
+    console.log(id)
+    axios.delete(`${process.env.URL}/api/speaker/action?id=${id}`,
+        {
+          headers: {
+             'Authorization':token
+          }
+        },
+        
+    )
+    .then((response)=>{
+      console.log(response.data)
+      dispatch(removeSpeaker(id))
+      toast({
+        title: "successful",
+        description: response.data.result.message ||  "speaker removed succesfully.",
+      })
+    })
+    .catch((err)=>{
+      console.log(err)
+      toast({
+        title: "Error",
+        description: err.response.data.message ||  "An unexpected error occurred. Please try again later or contact our support team.",
+      })
+
+    })
   }
 
   return (
@@ -58,21 +142,21 @@ export default function SpeakersPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {speakers.map((speaker) => (
-                  <TableRow key={speaker.id}>
+                {speakers?.map((speaker: Speaker) => (
+                  <TableRow key={speaker?._id}>
                     <TableCell>
-                      <Image src={speaker.image} alt={`${speaker.name}`} className="w-10 h-10 rounded-full object-cover" />
+                      <Image src={speaker?.image} alt={`${speaker?.name}`} className="w-10 h-10 rounded-full object-cover" width={100} height={100} />
                     </TableCell>
-                    <TableCell className="font-medium">{speaker.name}</TableCell>
-                    <TableCell>{speaker.role}</TableCell>
-                    <TableCell>{speaker.company}</TableCell>
+                    <TableCell className="font-medium">{speaker?.name}</TableCell>
+                    <TableCell>{speaker?.role}</TableCell>
+                    <TableCell>{speaker?.company}</TableCell>
                     <TableCell>
                       <div className="flex space-x-2">
                         <Button variant="ghost" size="icon">
                           <Pencil className="h-4 w-4" />
                           <span className="sr-only">Edit</span>
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={() => handleDeleteSpeaker(speaker.id)}>
+                        <Button variant="ghost" size="icon" onClick={() => handleDeleteSpeaker(speaker?._id)}>
                           <Trash2 className="h-4 w-4" />
                           <span className="sr-only">Delete</span>
                         </Button>

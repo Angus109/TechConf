@@ -1,37 +1,102 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle} from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Pencil, Trash2 } from 'lucide-react'
+import axios from 'axios'
+import { useToast } from '@/hooks/use-toast'
 import Image from 'next/image'
 
+import { useAppDispatch, useAppSelector } from '@/app/store/hook'
+import { fetchSponsors, addSponsor, removeSponsor } from '@/app/store/slices/sponsorSlice'
+
+interface Sponsor {
+  _id: string;
+  name: string;
+  logo: string;
+  tier: 'gold' | 'silver' | 'bronze';
+
+}
+
+
 export default function SponsorsPage() {
-  const [sponsors, setSponsors] = useState([
-    { id: 1, name: "TechCorp", logo: "/placeholder.svg?height=50&width=100", tier: "Gold" },
-    { id: 2, name: "InnovateLabs", logo: "/placeholder.svg?height=50&width=100", tier: "Silver" },
-    { id: 3, name: "FutureSoft", logo: "/placeholder.svg?height=50&width=100", tier: "Bronze" },
-    { id: 4, name: "DataDynamics", logo: "/placeholder.svg?height=50&width=100", tier: "Gold" },
-    { id: 5, name: "CloudNine", logo: "/placeholder.svg?height=50&width=100", tier: "Silver" },
-  ])
+
+  const { toast } = useToast()
+  const dispatch = useAppDispatch()
+  const { sponsors, status } = useAppSelector(state => state.sponsors)
 
   const [newSponsor, setNewSponsor] = useState({ name: '', logo: '', tier: 'Bronze' })
   const [isAddingSponsor, setIsAddingSponsor] = useState(false)
 
+
+  useEffect(() => {
+    if (status === 'idle') {
+      dispatch(fetchSponsors())
+    }
+  }, [status, dispatch])
+
+
   const handleAddSponsor = (e: React.FormEvent) => {
     e.preventDefault()
-    setSponsors([...sponsors, { ...newSponsor, id: sponsors.length + 1 }])
-    setNewSponsor({ name: '', logo: '', tier: 'Bronze' })
-    setIsAddingSponsor(false)
+    const token = localStorage.getItem("admin_auth_token") || "";
+    axios.post(`${process.env.URL}/api/sponsor`,
+      newSponsor, {
+      headers: {
+        'Authorization': `${token}`,
+        'Content-Type': 'application/json'
+      }
+    })
+      .then((response) => {
+        console.log(response.data)
+        dispatch(addSponsor(response.data.result))
+        setIsAddingSponsor(false)
+        toast({
+          title: "successful",
+          description: response.data.result.message || "sponsor added sucessfully.",
+        })
+      })
+      .catch((err) => {
+        console.log(err)
+        setIsAddingSponsor(false)
+        toast({
+          title: "Error",
+          description: err.response.data.message || "An unexpected error occurred. Please try again later or contact our support team.",
+        })
+      })
   }
 
-  const handleDeleteSponsor = (id: number) => {
-    setSponsors(sponsors.filter(sponsor => sponsor.id !== id))
+  const handleDeleteSponsor = (id: string) => {
+    // setSponsors(sponsors.filter(sponsor => sponsor.id !== id))
+    const token = localStorage.getItem("admin_auth_token") || "";
+
+    axios.post(`${process.env.URL}/api/sponsor/action?id=${id}`,
+      {
+        headers : {
+          'Authorization': token
+        }
+      },
+    )
+      .then((response) => {
+        console.log(response.data)
+        dispatch(removeSponsor(id))
+        toast({
+          title: "successful",
+          description: response.data.result.message || "sponsor removed successfully.",
+        })
+      })
+      .catch((err) => {
+        console.log(err)
+        toast({
+          title: "Error",
+          description: err.response.data.message || "An unexpected error occurred. Please try again later or contact our support team.",
+        })
+      })
   }
 
   return (
@@ -57,19 +122,19 @@ export default function SponsorsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {sponsors.map((sponsor) => (
-                <TableRow key={sponsor.id}>
-                  <TableCell className="font-medium">{sponsor.name}</TableCell>
+              {sponsors.map((sponsor: Sponsor) => (
+                <TableRow key={sponsor?._id}>
+                  <TableCell className="font-medium">{sponsor?.name}</TableCell>
                   <TableCell>
-                    <Image src={sponsor.logo} alt={`${sponsor.name} logo`} className="h-8" />
+                    <Image src={sponsor?.logo} alt={`${sponsor?.name} logo`} className="h-8"  width={100} height={100} />
                   </TableCell>
-                  <TableCell>{sponsor.tier}</TableCell>
+                  <TableCell>{sponsor?.tier}</TableCell>
                   <TableCell className="text-right">
                     <Button variant="ghost" size="icon" className="mr-2">
                       <Pencil className="h-4 w-4" />
                       <span className="sr-only">Edit</span>
                     </Button>
-                    <Button variant="ghost" size="icon" onClick={() => handleDeleteSponsor(sponsor.id)}>
+                    <Button variant="ghost" size="icon" onClick={() => handleDeleteSponsor(sponsor._id)}>
                       <Trash2 className="h-4 w-4" />
                       <span className="sr-only">Delete</span>
                     </Button>
@@ -98,7 +163,7 @@ export default function SponsorsPage() {
                 <Input
                   id="name"
                   value={newSponsor.name}
-                  onChange={(e) => setNewSponsor({...newSponsor, name: e.target.value})}
+                  onChange={(e) => setNewSponsor({ ...newSponsor, name: e.target.value })}
                   className="col-span-3"
                 />
               </div>
@@ -109,7 +174,7 @@ export default function SponsorsPage() {
                 <Input
                   id="logo"
                   value={newSponsor.logo}
-                  onChange={(e) => setNewSponsor({...newSponsor, logo: e.target.value})}
+                  onChange={(e) => setNewSponsor({ ...newSponsor, logo: e.target.value })}
                   className="col-span-3"
                 />
               </div>
@@ -119,7 +184,7 @@ export default function SponsorsPage() {
                 </Label>
                 <Select
                   value={newSponsor.tier}
-                  onValueChange={(value) => setNewSponsor({...newSponsor, tier: value})}
+                  onValueChange={(value) => setNewSponsor({ ...newSponsor, tier: value })}
                 >
                   <SelectTrigger className="col-span-3">
                     <SelectValue placeholder="Select sponsor tier" />

@@ -8,9 +8,17 @@ import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import axios from 'axios'
+// import axios from 'axios'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/hooks/use-toast'
+import { useAppDispatch } from '@/app/store/hook'
+import { login, signup } from '@/app/store/slices/organiserSlice'
+// import { useDispatch } from 'react-redux'
+
+interface LoginError {
+  name: string;
+  message: string;
+}
 
 export default function AdminLoginSignup() {
   const [isLoading, setIsLoading] = useState(false)
@@ -20,90 +28,131 @@ export default function AdminLoginSignup() {
   const [name, setName]= useState("")
   const [code, setCode]= useState("")
   const [error, setError] = useState<string | null>(null)
-  const domain = process.env.URL 
   const router = useRouter();
   const {toast} = useToast()
+  const dispatch = useAppDispatch()
 
  
 
   const handleLogin = async (event: React.FormEvent)=> {
     event.preventDefault()
     setIsLoading(true)
-    axios.post(`${domain}/api/admin/login`, {
-      email: email,
-      password: password
-    },
-  {
-    
-  }).then((response)=>{
-    console.log(response.data)
-    setIsLoading(false)
-    if(response.status == 200){
+
+    try{
+      await dispatch(login({email, password})).unwrap()
+      setIsLoading(false)
       toast({
-        title: "Login Successful",
-        description: response.data.message ||  "You have successfully logged in to your account.",
-      });
+        title: " Login Successful",
+        description:   "You have successfully logged in to your account.",
+      })
       router.push("/pages/organiser")
-    }else{
+    }catch(err: unknown){
+       const error = err as LoginError
+      setIsLoading(false)
+      setError(error?.message || "error")
       toast({
-        title: "Login Failed",
-        description: response.data.message ||  "Please check your credentials and try again",
+        title: error?.name || "Login Error",
+        description: error?.message || " An unexpected error occurred during login. Please try again later or contact our support team.",
       })
     }
 
 
-  }).catch((err)=>{
-    console.log(err)
-    setIsLoading(false)
-    setError("error")
-    toast({
-      title: "Login Error",
-      description: err.response.data.message ||  "An unexpected error occurred during login. Please try again later or contact our support team.",
-    })
-  })
+
+
+  //   axios.post(`${domain}/api/admin/login`, {
+  //     email: email,
+  //     password: password
+  //   },
+  // {
+    
+  // }).then((response)=>{
+  //   console.log(response.data)
+  //   setIsLoading(false)
+  //   if(response.status == 200){
+  //     toast({
+  //       title: "Login Successful",
+  //       description: response.data.message ||  "You have successfully logged in to your account.",
+  //     });
+  //     router.push("/pages/organiser")
+  //   }else{
+  //     toast({
+  //       title: "Login Failed",
+  //       description: response.data.message ||  "Please check your credentials and try again",
+  //     })
+  //   }
+
+
+  // }).catch((err)=>{
+  //   console.log(err)
+  //   setIsLoading(false)
+  //   setError("error")
+  //   toast({
+  //     title: "Login Error",
+  //     description: err.response.data.message ||  "An unexpected error occurred during login. Please try again later or contact our support team.",
+  //   })
+  // })
 
 
   }
 
 
-  const handleSignup = (event: React.FormEvent)=>{
+  const handleSignup = async (event: React.FormEvent)=>{
     event.preventDefault()
     setIsLoading(true)
 
 
-    axios.post(`${domain}/api/admin`, {
-      name: name,
-      email: email,
-      password: password,
-      code: code
-    },
-  {
-    
-  }).then((response)=>{
-    console.log(response.data)
-    setIsLoading(false)
-    if(response.status == 200){
+    try{
+      await dispatch(signup({name, email, password, code})).unwrap()
       toast({
-        title: "signup Successful",
-        description: response.data.message ||  "You have successfully logged in to your account.",
-      });
+        title: " Login Successful",
+        description: "You have successfully logged in to your account.",
+      })
       router.push("/pages/organiser")
-    }else{
+    }catch(err: unknown){
+      const error = err as LoginError
+      console.log(error)
+      setIsLoading(false)
       toast({
-        title: "Signup Failed",
-        description: response.data.message ||  "Please check your credentials and try again",
+        title: `${error.name || "signup error"}`,
+        description:  " An unexpected error occurred during login. Please try again later or contact our support team.",
       })
     }
 
 
-  }).catch((err)=>{
-    console.log(err)
-    setIsLoading(false)
-    toast({
-      title: "Signup Error",
-      description: err.response.data.message ||  "An unexpected error occurred during signup. Please try again later or contact our support team.",
-    })
-  })
+
+  //   axios.post(`${domain}/api/admin`, {
+  //     name: name,
+  //     email: email,
+  //     password: password,
+  //     code: code
+  //   },
+  // {
+    
+  // }).then((response)=>{
+  //   console.log(response.data)
+  //   setIsLoading(false)
+  //   if(response.status == 200){
+  //     toast({
+  //       title: "signup Successful",
+  //       description: response.data.message ||  "You have successfully logged in to your account.",
+  //     });
+  //     router.push("/pages/organiser")
+  //   }else{
+  //     toast({
+  //       title: "Signup Failed",
+  //       description: response.data.message ||  "Please check your credentials and try again",
+  //     })
+  //   }
+
+
+  // }).catch((err)=>{
+  //   console.log(err)
+  //   setIsLoading(false)
+  //   toast({
+  //     title: "Signup Error",
+  //     description: err.response.data.message ||  "An unexpected error occurred during signup. Please try again later or contact our support team.",
+  //   })
+  // })
   
   }
 

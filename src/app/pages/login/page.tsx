@@ -8,17 +8,25 @@ import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { CalendarDays } from "lucide-react"
 import { useRouter } from 'next/navigation'
-import axios from "axios"
 import { useToast } from '@/hooks/use-toast'
+import { useAppDispatch } from "@/app/store/hook";
+import { login, signup } from "@/app/store/slices/userSlice";
+
+
+interface LoginError {
+  name: string;
+  message: string;
+}
 
 
 export default function LoginSignup() {
+  const dispatch = useAppDispatch()
+
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [name, setName]= useState("")
-  const domain = process.env.URL 
   const {toast} = useToast()
 
 
@@ -26,83 +34,120 @@ export default function LoginSignup() {
   const handleLogin = async (event: React.FormEvent)=> {
     event.preventDefault()
     setIsLoading(true)
-    axios.post(`${domain}/api/user/login`, {
-      email: email,
-      password: password
-    },
-  {
-    
-  }).then((response)=>{
-    console.log(response.data)
-    setIsLoading(false)
-    if(response.status == 200){
-     
+
+    try{
+      await dispatch(login({email, password})).unwrap()
+      setIsLoading(false)
       toast({
         title: " Login Successful",
-        description: response.data.message ||  "You have successfully logged in to your account.",
+        description:   "You have successfully logged in to your account.",
       })
       router.push("/pages")
-    }else{
+    }catch(err: unknown){
+      const error = err as LoginError
+      console.log(error)
+      setIsLoading(false)
       toast({
-        title: " Login Failed",
-        description: response.data.message ||  " Please check your credentials and try again.",
+        title: error?.name || "Login Error",
+        description: error?.message || " An unexpected error occurred during login. Please try again later or contact our support team.",
       })
     }
 
 
-  }).catch((err)=>{
-    console.log(err)
-    setIsLoading(false)
-    toast({
-      title: "Login Error",
-      description: err.response.data.message || err.message ||  " An unexpected error occurred during login. Please try again later or contact our support team.",
-    })
+//     axios.post(`${domain}/api/user/login`, {
+//       email: email,
+//       password: password
+//     },
+//   {
+    
+//   }).then((response)=>{
+//     console.log(response.data)
+//     setIsLoading(false)
+//     if(response.status == 200){
+     
+//       toast({
+//         title: " Login Successful",
+//         description: response.data.message ||  "You have successfully logged in to your account.",
+//       })
+//       router.push("/pages")
+//     }else{
+//       toast({
+//         title: " Login Failed",
+//         description: response.data.message ||  " Please check your credentials and try again.",
+//       })
+//     }
 
-  })
+
+//   }).catch((err)=>{
+//     console.log(err)
+    // setIsLoading(false)
+    // toast({
+    //   title: "Login Error",
+    //   description: err.response.data.message || err.message ||  " An unexpected error occurred during login. Please try again later or contact our support team.",
+    // })
+
+//   }
+// )
 
 
   }
 
 
-  const handleSignup = (event: React.FormEvent)=>{
+  const handleSignup = async (event: React.FormEvent)=>{
     event.preventDefault()
     setIsLoading(true)
 
-
-    axios.post(`${domain}/api/user`, {
-      name: name,
-      email: email,
-      password: password
-    },
-  {
-    
-  }).then((response)=>{
-    console.log(response.data)
-    setIsLoading(false)
-    if(response.status == 200){
-      
+    try{
+      await dispatch(signup({name, email, password})).unwrap()
       toast({
         title: " Login Successful",
-        description: response.data.message ||  "You have successfully logged in to your account.",
+        description: "You have successfully logged in to your account.",
       })
       router.push("/pages")
-    }else{
+    }catch(err){
+      console.log(err)
+      setIsLoading(false)
       toast({
-        title: " Login Failed",
-        description: response.data.message ||  " Please check your credentials and try again.",
+        title: "signup Error",
+        description:  " An unexpected error occurred during login. Please try again later or contact our support team.",
       })
     }
 
 
-  }).catch((err)=>{
-    console.log(err)
-    setIsLoading(false)
-    toast({
-      title: "signup Error",
-      description: err.response.data.message || err.message ||  " An unexpected error occurred during login. Please try again later or contact our support team.",
-    })
+  //   axios.post(`${domain}/api/user`, {
+  //     name: name,
+  //     email: email,
+  //     password: password
+  //   },
+  // {
+    
+  // }).then((response)=>{
+  //   console.log(response.data)
+  //   setIsLoading(false)
+  //   if(response.status == 200){
+      
+  //     toast({
+  //       title: " Login Successful",
+  //       description: response.data.message ||  "You have successfully logged in to your account.",
+  //     })
+  //     router.push("/pages")
+  //   }else{
+  //     toast({
+  //       title: " Login Failed",
+  //       description: response.data.message ||  " Please check your credentials and try again.",
+  //     })
+  //   }
 
-  })
+
+  // }).catch((err)=>{
+  //   console.log(err)
+  //   setIsLoading(false)
+  //   toast({
+  //     title: "signup Error",
+  //     description: err.response.data.message || err.message ||  " An unexpected error occurred during login. Please try again later or contact our support team.",
+  //   })
+
+  // })
   
   }
 
